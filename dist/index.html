@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e9f5f4" />
+    <title>深圳台风一屏信息站 · 试验</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --canvas: #e9f5f4;
+        --canvas-deep: #d4ece9;
+        --panel: rgba(255, 255, 255, 0.82);
+        --panel-solid: #fbfefd;
+        --ink: #112e3f;
+        --muted: #57727d;
+        --hairline: rgba(27, 73, 85, 0.16);
+        --ocean: #006b83;
+        --ocean-bright: #008ca6;
+        --foam: #dff7f5;
+        --yellow: #d39908;
+        --orange: #db6919;
+        --red: #c73c45;
+        --blue: #2c77be;
+        --shadow: 0 18px 50px rgba(20, 62, 77, 0.12);
+      }
+
+      [data-theme="night"] {
+        color-scheme: dark;
+        --canvas: #061b2a;
+        --canvas-deep: #0b3040;
+        --panel: rgba(10, 39, 53, 0.85);
+        --panel-solid: #0c2a39;
+        --ink: #e8f7f4;
+        --muted: #a4c5ca;
+        --hairline: rgba(199, 236, 231, 0.17);
+        --ocean: #60d5e2;
+        --ocean-bright: #9de9ee;
+        --foam: #153f4d;
+        --yellow: #ffd35c;
+        --orange: #ff9b5e;
+        --red: #ff858d;
+        --blue: #79b9ff;
+        --shadow: 0 20px 58px rgba(0, 0, 0, 0.28);
+      }
+
+      * { box-sizing: border-box; }
+      html { min-width: 320px; background: var(--canvas); }
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--ink);
+        font-family: "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
+        background:
+          linear-gradient(112deg, rgba(0, 107, 131, 0.06), transparent 33%),
+          radial-gradient(circle at 78% -10%, rgba(49, 178, 194, 0.2), transparent 32%),
+          var(--canvas);
+      }
+
+      button, select, input { font: inherit; }
+      button, select { color: inherit; }
+      button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible {
+        outline: 3px solid var(--ocean-bright);
+        outline-offset: 3px;
+      }
+
+      .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+      .masthead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 76px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 780; letter-spacing: 0.04em; }
+      .signal-mark {
+        display: grid;
+        width: 29px; height: 29px;
+        place-items: center;
+        border: 1px solid var(--ocean);
+        border-radius: 50%;
+        color: var(--ocean);
+        font-size: 13px;
+      }
+      .header-actions { display: flex; align-items: center; gap: 10px; }
+      .trial-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 32px;
+        padding: 5px 10px;
+        border: 1px solid color-mix(in srgb, var(--orange) 55%, var(--hairline));
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--orange) 10%, var(--panel));
+        color: var(--orange);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+      .trial-badge::before { content: "✳"; font-size: 14px; }
+      .theme-toggle {
+        min-height: 38px;
+        padding: 8px 11px;
+        border: 1px solid var(--hairline);
+        border-radius: 9px;
+        background: var(--panel);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      main { padding: 24px 0 38px; }
+      .notice-strip {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 10px 13px;
+        border: 1px solid color-mix(in srgb, var(--orange) 45%, var(--hairline));
+        background: color-mix(in srgb, var(--orange) 8%, var(--panel));
+        border-radius: 10px;
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .notice-strip strong { color: var(--orange); }
+
+      .eyebrow {
+        margin: 0 0 5px;
+        color: var(--ocean);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.38fr) minmax(270px, 0.62fr);
+        gap: 20px;
+        padding: clamp(22px, 4vw, 42px);
+        border: 1px solid var(--hairline);
+        border-radius: 22px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .hero-copy { position: relative; z-index: 1; }
+      .hero-copy h1 {
+        max-width: 9em;
+        margin: 0;
+        font-family: Georgia, "Songti SC", serif;
+        font-size: clamp(38px, 6.3vw, 76px);
+        font-weight: 700;
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+      .hero-copy h1 span { display: block; color: var(--ocean); }
+      .hero-lead { max-width: 39rem; margin: 18px 0 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+      .hero-meta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+      .hero-meta span {
+        padding: 7px 10px;
+        border: 1px solid var(--hairline);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .hero-orbit {
+        position: relative;
+        display: grid;
+        min-height: 238px;
+        place-items: center;
+        isolation: isolate;
+      }
+      .hero-orbit::before, .hero-orbit::after {
+        position: absolute;
+        content: "";
+        border: 1px solid color-mix(in srgb, var(--ocean) 44%, transparent);
+        border-radius: 50%;
+      }
+      .hero-orbit::before { width: 206px; height: 206px; }
+      .hero-orbit::after { width: 128px; height: 128px; border-style: dashed; }
+      .pressure-label {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        width: 88px; height: 88px;
+        place-content: center;
+        border-radius: 50%;
+        background: var(--ocean);
+        color: #fff;
+        text-align: center;
+        box-shadow: 0 0 0 12px color-mix(in srgb, var(--ocean) 10%, transparent);
+      }
+      .pressure-label b { font-size: 29px; line-height: 0.9; }
+      .pressure-label small { margin-top: 3px; font-size: 10px; letter-spacing: 0.07em; }
+      .orbit-note { position: absolute; right: 0; bottom: 15px; color: var(--muted); font-size: 11px; }
+
+      .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 34px 0 13px; }
+      h2 { margin: 0; font-size: 19px; letter-spacing: -0.02em; }
+      .section-caption { margin: 0; color: var(--muted); font-size: 12px; }
+      .panel {
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        background: var(--panel);
+        box-shadow: 0 12px 28px rgba(20, 62, 77, 0.06);
+      }
+      .data-grid { display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden; }
+      .data-cell { min-height: 142px; padding: 22px; border-right: 1px solid var(--hairline); }
+      .data-cell:last-child { border-right: 0; }
+      .data-label { display: block; color: var(--muted); font-size: 12px; font-weight: 700; }
+      .data-value { display: block; margin-top: 13px; color: var(--ink); font-size: clamp(23px, 3vw, 35px); font-weight: 820; letter-spacing: -0.05em; }
+      .data-value em { margin-left: 3px; color: var(--muted); font-size: 12px; font-style: normal; letter-spacing: 0; }
+      .data-detail { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .data-cell.accent .data-value { color: var(--yellow); }
+
+      .route-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr); gap: 18px; }
+      .route-card { padding: 18px; }
+      .route-card svg { display: block; width: 100%; height: auto; min-height: 280px; }
+      .svg-label { fill: var(--muted); font: 700 11px "Microsoft YaHei UI", sans-serif; }
+      .svg-small { fill: var(--muted); font: 600 10px "Microsoft YaHei UI", sans-serif; }
+      .route-side { padding: 21px; }
+      .route-side h3 { margin: 0; font-size: 15px; }
+      .route-side p { margin: 8px 0 18px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+      .route-list { display: grid; gap: 13px; padding: 0; margin: 0; list-style: none; }
+      .route-list li { display: grid; grid-template-columns: 10px 1fr; gap: 10px; font-size: 13px; line-height: 1.5; }
+      .route-list i { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--ocean); }
+      .route-list li:nth-child(2) i { background: var(--yellow); }
+      .route-list li:nth-child(3) i { background: var(--orange); }
+      .route-list span { color: var(--muted); }
+      .route-list b { color: var(--ink); }
+
+      .alert-topline { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 17px; }
+      .alert-topline p { margin: 0; color: var(--muted); font-size: 13px; }
+      .alert-select {
+        min-height: 38px;
+        padding: 5px 9px;
+        border: 1px solid var(--hairline);
+        border-radius: 8px;
+        background: var(--panel-solid);
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .alert-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+      .alert-card {
+        display: flex;
+        min-height: 260px;
+        flex-direction: column;
+        padding: 17px;
+        border: 1px solid var(--hairline);
+        border-top: 5px solid var(--alert);
+        border-radius: 14px;
+        background: var(--panel);
+        transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+      }
+      .alert-card.active { border-color: var(--alert); box-shadow: 0 12px 28px color-mix(in srgb, var(--alert) 16%, transparent); transform: translateY(-3px); }
+      .alert-card.blue { --alert: var(--blue); }
+      .alert-card.yellow { --alert: var(--yellow); }
+      .alert-card.orange { --alert: var(--orange); }
+      .alert-card.red { --alert: var(--red); }
+      .alert-kicker { margin: 0; color: var(--alert); font-size: 12px; font-weight: 900; letter-spacing: 0.08em; }
+      .alert-card h3 { margin: 7px 0 3px; font-size: 20px; letter-spacing: -0.04em; }
+      .alert-card > p { min-height: 39px; margin: 0 0 13px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+      .checks { display: grid; gap: 8px; margin-top: auto; }
+      .check { display: flex; align-items: start; gap: 8px; color: var(--ink); font-size: 12px; line-height: 1.45; cursor: pointer; }
+      .check input { width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--alert); cursor: pointer; }
+      .check:has(input:checked) { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--alert); }
+
+      .source-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 22px;
+        padding-top: 17px;
+        border-top: 1px solid var(--hairline);
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .source-footer a { color: var(--ocean); font-weight: 800; }
+      .source-footer p { margin: 0; }
+
+      @media (max-width: 820px) {
+        .hero, .route-layout { grid-template-columns: 1fr; }
+        .hero-orbit { min-height: 180px; margin-top: -12px; }
+        .data-grid { grid-template-columns: repeat(2, 1fr); }
+        .data-cell:nth-child(2) { border-right: 0; }
+        .data-cell:nth-child(-n+2) { border-bottom: 1px solid var(--hairline); }
+        .alert-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 520px) {
+        .shell { width: min(100% - 20px, 1180px); }
+        .masthead { min-height: 64px; }
+        .brand { font-size: 14px; }
+        .header-actions { gap: 6px; }
+        .trial-badge { padding: 5px 8px; font-size: 10px; }
+        .theme-toggle { padding: 8px; font-size: 11px; }
+        main { padding-top: 12px; }
+        .notice-strip { margin-bottom: 12px; font-size: 12px; }
+        .hero { gap: 6px; padding: 23px 20px 18px; border-radius: 16px; }
+        .hero-copy h1 { max-width: none; font-size: 45px; }
+        .hero-lead { margin-top: 14px; font-size: 13px; }
+        .hero-orbit { min-height: 146px; transform: scale(0.82); margin: -20px 0 -20px; }
+        .section-head { align-items: start; flex-direction: column; gap: 4px; margin-top: 25px; }
+        .data-cell { min-height: 117px; padding: 16px 14px; }
+        .route-card { padding: 8px; }
+        .route-card svg { min-height: 230px; }
+        .alert-topline { align-items: stretch; flex-direction: column; }
+        .alert-grid { grid-template-columns: 1fr; }
+        .alert-card { min-height: auto; }
+        .checks { margin-top: 13px; }
+        .source-footer { align-items: start; flex-direction: column; gap: 8px; }
+      }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+    </style>
+  </head>
+  <body>
+    <header class="shell masthead">
+      <div class="brand"><span class="signal-mark" aria-hidden="true">SZ</span>深圳台风一屏信息站</div>
+      <div class="header-actions">
+        <span class="trial-badge" id="source-mode-badge">试验 · 演示数据</span>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">切换至夜间</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <aside class="notice-strip" id="data-notice" aria-label="数据说明">
+        <strong id="data-notice-title">试验提示</strong><span id="data-notice-text">本页所有台风、路径、预警和行动内容均为演示，不是实况或政府指令。</span>
+      </aside>
+
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Shenzhen · Storm brief / 试验</p>
+          <h1 id="page-title"><span id="storm-name">试验风暴 A-01</span></h1>
+          <p class="hero-lead" id="storm-lead">当前演示情景：风暴中心在深圳东南海域外，正以西北方向移动。请把这张页面理解为信息布局样稿，不作为出行或避险依据。</p>
+          <div class="hero-meta">
+            <span id="hero-warning">黄色预警 · 演示</span>
+            <span id="updated-at">生成时间：2026-10-16 09:30（北京时间）</span>
+            <span id="source-line">来源：试验数据集</span>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-label="试验风暴中心气压 970 百帕">
+          <div class="pressure-label"><b id="pressure-value">970 hPa</b><small>中心气压</small></div>
+          <span class="orbit-note">模拟等压环</span>
+        </div>
+      </section>
+
+      <div class="section-head"><div><p class="eyebrow">01 / now</p><h2>台风实况</h2></div><p class="section-caption">全部为试验数据 · 不代表实际天气</p></div>
+      <section class="panel data-grid" aria-label="台风实况数据">
+        <article class="data-cell"><span class="data-label">中心位置</span><strong class="data-value" id="position-value">20.6°N / 116.2°E</strong><span class="data-detail" id="position-detail">深圳东南约 310 km · 试验</span></article>
+        <article class="data-cell accent"><span class="data-label">近中心最大风速</span><strong class="data-value" id="wind-value">23 m/s</strong><span class="data-detail" id="wind-detail">演示强度 · 非实况</span></article>
+        <article class="data-cell"><span class="data-label">移动方向</span><strong class="data-value" id="movement-value">西北</strong><span class="data-detail" id="movement-detail">演示数据</span></article>
+        <article class="data-cell"><span class="data-label">距深圳估算</span><strong class="data-value" id="distance-value">约 310 km</strong><span class="data-detail" id="distance-detail">试验假设 · 非预报</span></article>
+      </section>
+
+      <div class="section-head"><div><p class="eyebrow">02 / route</p><h2>路径示意</h2></div><p class="section-caption">实线为已知演示点，虚线为试验预测</p></div>
+      <section class="route-layout" aria-label="试验风暴路径">
+        <div class="panel route-card">
+          <svg id="route-svg" viewBox="0 0 650 330" role="img" aria-labelledby="track-title track-desc">
+            <title id="track-title">试验风暴 A-01 前往深圳附近的路径示意</title>
+            <desc id="track-desc">演示风暴从东南海域向西北移动。深圳标记在左侧，风暴中心和二十四小时试验预测点在右侧沿虚线连接。</desc>
+            <defs>
+              <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" stroke-opacity=".12" stroke-width="1"/></pattern>
+              <filter id="glow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect x="0" y="0" width="650" height="330" rx="12" fill="url(#grid)" style="color:var(--ocean)"/>
+            <path d="M38 289 C130 252, 182 238, 248 232 C330 226, 385 209, 448 158 C500 116, 546 86, 620 56" fill="none" stroke="var(--ocean)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M448 158 C504 122, 548 91, 620 56" fill="none" stroke="var(--orange)" stroke-width="3" stroke-dasharray="7 8" stroke-linecap="round"/>
+            <g opacity=".9"><circle cx="58" cy="283" r="13" fill="var(--ocean)"/><circle cx="58" cy="283" r="23" fill="none" stroke="var(--ocean)" stroke-opacity=".45"/><path d="M58 270v26M45 283h26" stroke="#fff" stroke-width="2"/></g>
+            <text x="82" y="280" class="svg-label">深圳 · 演示定位</text><text x="82" y="297" class="svg-small">22.54°N / 114.06°E</text>
+            <g><circle cx="254" cy="231" r="6" fill="var(--ocean)"/><text x="266" y="225" class="svg-label">-24h</text></g>
+            <g><circle cx="346" cy="221" r="6" fill="var(--ocean)"/><text x="358" y="215" class="svg-label">-12h</text></g>
+            <g filter="url(#glow)"><circle cx="448" cy="158" r="17" fill="var(--yellow)"/><circle cx="448" cy="158" r="7" fill="var(--panel-solid)"/></g>
+            <text x="469" y="151" class="svg-label">当前：试验 A-01</text><text x="469" y="168" class="svg-small">20.6°N / 116.2°E</text>
+            <g><circle cx="542" cy="96" r="8" fill="var(--orange)"/><text x="553" y="91" class="svg-label">+12h</text></g>
+            <g><circle cx="620" cy="56" r="8" fill="var(--orange)"/><text x="554" y="50" class="svg-label">+24h · 试验</text></g>
+            <path d="M406 177 l23 -10 l-9 22" fill="var(--yellow)"/>
+            <text x="398" y="203" class="svg-small">西北方向 / 演示</text>
+          </svg>
+        </div>
+        <aside class="panel route-side" aria-label="路径解读">
+          <p class="eyebrow">路径解读</p><h3 id="route-side-title">看方向，不把它当作预测</h3>
+          <p id="route-side-lead">路径图只展示产品会如何区分“已发生位置”和“可能路径”。生产版本需要来自获授权的官方数据源。</p>
+          <ul class="route-list" id="route-list"><li><i></i><div><b>当前点</b><br><span>离深圳约 310 km</span></div></li><li><i></i><div><b>12 小时</b><br><span>持续向西北移动</span></div></li><li><i></i><div><b>24 小时</b><br><span>不提供登陆或影响结论</span></div></li></ul>
+        </aside>
+      </section>
+
+      <div class="section-head"><div><p class="eyebrow">03 / action</p><h2>预警信息与行动清单</h2></div><p class="section-caption">按演示级别切换；所有清单均可勾选</p></div>
+      <section class="panel" aria-labelledby="alert-title">
+        <div class="alert-topline"><p id="alert-title"><strong id="active-alert-label">黄色预警</strong> 仅用于切换居民自检清单，不代表当前官方预警；真实预警须以官方发布为准。</p><label>切换自检级别 <select class="alert-select" id="alert-select" aria-label="切换居民自检级别"><option value="blue">蓝色预警</option><option value="yellow" selected>黄色预警</option><option value="orange">橙色预警</option><option value="red">红色预警</option></select></label></div>
+      </section>
+      <div class="alert-grid" style="margin-top:12px">
+        <article class="alert-card blue" data-level="blue"><p class="alert-kicker">LEVEL 04</p><h3>蓝色预警</h3><p>把天气变化纳入行程，完成基础检查。</p><div class="checks"><label class="check"><input type="checkbox"/>查看权威天气更新</label><label class="check"><input type="checkbox"/>固定阳台易落物</label><label class="check"><input type="checkbox"/>准备充电与照明</label></div></article>
+        <article class="alert-card yellow active" data-level="yellow"><p class="alert-kicker">LEVEL 03</p><h3>黄色预警</h3><p>减少不必要出行，提前安排通勤与物资。</p><div class="checks"><label class="check"><input type="checkbox"/>避开海边与低洼路段</label><label class="check"><input type="checkbox"/>储备饮水和常用药</label><label class="check"><input type="checkbox"/>提醒家人更新计划</label></div></article>
+        <article class="alert-card orange" data-level="orange"><p class="alert-kicker">LEVEL 02</p><h3>橙色预警</h3><p>将安全安排落到人和地点，留意官方指令。</p><div class="checks"><label class="check"><input type="checkbox"/>取消高风险户外活动</label><label class="check"><input type="checkbox"/>远离广告牌与树木</label><label class="check"><input type="checkbox"/>确认居所门窗排水</label></div></article>
+        <article class="alert-card red" data-level="red"><p class="alert-kicker">LEVEL 01</p><h3>红色预警</h3><p>优先保证人身安全，严格跟随官方安排。</p><div class="checks"><label class="check"><input type="checkbox"/>留在安全室内位置</label><label class="check"><input type="checkbox"/>不涉水、不靠近海边</label><label class="check"><input type="checkbox"/>遵循撤离或停工指令</label></div></article>
+      </div>
+
+      <footer class="source-footer"><p><strong>试验页面：</strong>尚未接入实时数据。紧急情况请联系 110 / 119 / 120。</p><p>未来权威入口：<a href="https://weather.sz.gov.cn/" target="_blank" rel="noreferrer">深圳市气象局</a> · <a href="https://tf.121.com.cn/" target="_blank" rel="noreferrer">深圳台风网</a></p></footer>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
