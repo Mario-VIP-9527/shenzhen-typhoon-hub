@@ -1,6 +1,9 @@
 name: Deploy Shenzhen Typhoon Pages
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
     - cron: "*/15 * * * *"
