@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="day">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#e9f5f4" />
     <title>深圳台风一屏信息站 · 试验</title>
     <style>
@@ -49,6 +49,7 @@
       body {
         min-width: 320px;
         margin: 0;
+        overflow-x: clip;
         color: var(--ink);
         font-family: "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
         background:
@@ -211,7 +212,7 @@
       .data-cell { min-height: 142px; padding: 22px; border-right: 1px solid var(--hairline); }
       .data-cell:last-child { border-right: 0; }
       .data-label { display: block; color: var(--muted); font-size: 12px; font-weight: 700; }
-      .data-value { display: block; margin-top: 13px; color: var(--ink); font-size: clamp(23px, 3vw, 35px); font-weight: 820; letter-spacing: -0.05em; }
+      .data-value { display: block; margin-top: 13px; color: var(--ink); font-size: clamp(23px, 3vw, 35px); font-weight: 820; letter-spacing: -0.05em; overflow-wrap: anywhere; }
       .data-value em { margin-left: 3px; color: var(--muted); font-size: 12px; font-style: normal; letter-spacing: 0; }
       .data-detail { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.5; }
       .data-cell.accent .data-value { color: var(--yellow); }
@@ -293,19 +294,27 @@
       }
       @media (max-width: 520px) {
         .shell { width: min(100% - 20px, 1180px); }
-        .masthead { min-height: 64px; }
-        .brand { font-size: 14px; }
-        .header-actions { gap: 6px; }
-        .trial-badge { padding: 5px 8px; font-size: 10px; }
-        .theme-toggle { padding: 8px; font-size: 11px; }
-        main { padding-top: 12px; }
+        .masthead {
+          min-height: 0;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          padding-top: max(12px, env(safe-area-inset-top));
+          padding-bottom: 12px;
+        }
+        .brand { min-width: 0; font-size: 14px; letter-spacing: 0; }
+        .header-actions { width: 100%; justify-content: space-between; gap: 8px; }
+        .trial-badge { min-height: 36px; padding: 5px 9px; font-size: 11px; }
+        .theme-toggle, .alert-select { min-height: 44px; }
+        .theme-toggle { padding: 8px 11px; font-size: 12px; }
+        main { padding-top: 12px; padding-bottom: max(38px, calc(18px + env(safe-area-inset-bottom))); }
         .notice-strip { margin-bottom: 12px; font-size: 12px; }
         .hero { gap: 6px; padding: 23px 20px 18px; border-radius: 16px; }
-        .hero-copy h1 { max-width: none; font-size: 45px; }
+        .hero-copy h1 { max-width: none; font-size: 40px; overflow-wrap: anywhere; }
         .hero-lead { margin-top: 14px; font-size: 13px; }
         .hero-orbit { min-height: 146px; transform: scale(0.82); margin: -20px 0 -20px; }
         .section-head { align-items: start; flex-direction: column; gap: 4px; margin-top: 25px; }
-        .data-cell { min-height: 117px; padding: 16px 14px; }
+        .data-cell { min-width: 0; min-height: 117px; padding: 16px 14px; }
         .route-card { padding: 8px; }
         .route-card svg { min-height: 230px; }
         .alert-topline { align-items: stretch; flex-direction: column; }

@@ -24,3 +24,12 @@ test("static page exposes the required typhoon dashboard sections", () => {
     assert.match(html, new RegExp(expectedText));
   }
 });
+
+test("phone layout protects safe areas and keeps primary controls comfortably tappable", () => {
+  const html = readFileSync(pagePath, "utf8");
+
+  assert.match(html, /viewport-fit=cover/, "the viewport must include phone safe areas");
+  assert.match(html, /safe-area-inset-top/, "the header must respect a phone safe area");
+  assert.match(html, /\.theme-toggle, \.alert-select\s*\{\s*min-height: 44px;/, "phone controls need a 44px tap target");
+  assert.match(html, /\.data-value\s*\{[^}]*overflow-wrap: anywhere;/s, "long live values must not force horizontal scrolling");
+});
