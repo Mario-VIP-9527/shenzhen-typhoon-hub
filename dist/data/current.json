@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "mode": "demo-fallback",
+  "retrievedAt": "2026-10-16T00:00:00.000Z",
+  "source": {
+    "name": "深圳台风网",
+    "url": "https://tf.121.com.cn/"
+  },
+  "reason": "本地静态预览使用演示数据；部署后由 GitHub Actions 生成。",
+  "storm": {
+    "id": "DEMO-A01",
+    "name": "试验风暴 A-01",
+    "englishName": "DEMO A-01",
+    "latitude": 20.6,
+    "longitude": 116.2,
+    "windMps": 23,
+    "pressureHpa": 970,
+    "movementDirection": "西北",
+    "movementSpeedKmh": 18,
+    "sourceIssuedAt": "2026-10-15T23:30:00.000Z",
+    "location": "深圳东南海域外（演示）",
+    "conclusion": "演示路径，仅用于说明页面布局。"
+  },
+  "track": [
+    {
+      "at": "2026-10-14T23:30:00.000Z",
+      "latitude": 19.8,
+      "longitude": 117.7,
+      "kind": "observed",
+      "windMps": 20,
+      "pressureHpa": 985
+    },
+    {
+      "at": "2026-10-15T23:30:00.000Z",
+      "latitude": 20.6,
+      "longitude": 116.2,
+      "kind": "observed",
+      "windMps": 23,
+      "pressureHpa": 970
+    }
+  ],
+  "forecast": [
+    {
+      "at": "2026-10-16T11:30:00.000Z",
+      "latitude": 21.2,
+      "longitude": 115.5,
+      "kind": "forecast",
+      "agency": "BABJ",
+      "hoursAhead": 12,
+      "windMps": 25,
+      "pressureHpa": 965
+    },
+    {
+      "at": "2026-10-16T23:30:00.000Z",
+      "latitude": 21.8,
+      "longitude": 114.8,
+      "kind": "forecast",
+      "agency": "BABJ",
+      "hoursAhead": 24,
+      "windMps": 27,
+      "pressureHpa": 960
+    }
+  ],
+  "calculated": {
+    "shenzhenDistanceKm": 310
+  }
+}
